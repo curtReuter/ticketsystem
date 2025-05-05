@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>IT Ticketing System</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <div class="container">
+        <h1>Submit an IT Ticket</h1>
+        <form id="ticket-form">
+            <label for="reporter">Your Name:</label>
+            <input type="text" id="reporter" required />
+
+            <label for="category">Category:</label>
+            <select id="category" required>
+                <option value="">-- Select Category --</option>
+                <option value="Network">Network</option>
+                <option value="Hardware">Hardware</option>
+                <option value="Software">Software</option>
+                <option value="Access">Access</option>
+            </select>
+
+            <label for="description">Issue Description:</label>
+            <textarea id="description" required></textarea>
+
+            <button type="submit">Report Issue</button>
+        </form>
+
+        <div id="error"></div>
+        <div id="success"></div>
+
+        <div class="chart-container">
+            <h2>Tickets Reported</h2>
+            <canvas id="ticketChart"></canvas>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
