@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>IT Ticketing System</title>
+  <title>Report Issue</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
 
@@ -113,7 +113,7 @@
       border-radius: 8px;
     }
 
-    @media screen and (max-width: 600px) {
+    @media screen and (max-width: 1000px) {
       .container {
         padding: 15px;
       }
@@ -123,13 +123,13 @@
 <body>
 
   <div class="container">
-    <h1>Submit IT Ticket</h1>
+    <h1>DTAC Issue Reporter</h1>
 
     <form id="ticketForm">
-      <label for="reporter"><i class="fas fa-user"></i> Your Name:</label>
+      <label for="reporter"><i class="fas fa-user"></i> First Name:</label>
       <input type="text" id="reporter" name="reporter" required>
 
-      <label for="category"><i class="fas fa-cogs"></i> Issue Category:</label>
+      <label for="category"><i class="fas fa-cogs"></i> Category:</label>
       <select id="category" name="category" required>
         <option value="" disabled selected>Select a category</option>
         <option value="Hardware">Hardware</option>
@@ -138,7 +138,7 @@
         <option value="Access">Access</option>
       </select>
 
-      <label for="description"><i class="fas fa-comment-dots"></i> Describe the issue:</label>
+      <label for="description"><i class="fas fa-comment-dots"></i> Description:</label>
       <textarea id="description" name="description" rows="5" required></textarea>
 
       <button id="submit-btn" type="submit">Submit Ticket</button>
@@ -231,7 +231,8 @@
           chart.data.datasets[0].data = Object.values(ticketCounts);
           chart.update();
 
-          messageDiv.textContent = `✅ Ticket submitted successfully! Thank you, ${reporter}!`;
+          messageDiv.textContent = `✅ Ticket submitted successfully! 
+          Thank you, ${reporter}!`;
           messageDiv.classList.add('success');
           form.reset();
         } else {
