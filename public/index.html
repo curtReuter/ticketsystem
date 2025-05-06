@@ -1,42 +1,221 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-    <title>IT Ticketing System</title>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <meta charset="UTF-8">
+  <title>IT Ticketing System</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    body {
+      background-color: #121212;
+      color: white;
+      font-family: 'Segoe UI', sans-serif;
+      margin: 0;
+      padding: 20px;
+    }
+
+    .container {
+      max-width: 600px;
+      margin: auto;
+      background: #1e1e1e;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 0 10px rgba(255, 255, 255, 0.1);
+    }
+
+    h1 {
+      text-align: center;
+      color: #ffffff;
+    }
+
+    label {
+      display: block;
+      margin-top: 15px;
+      font-weight: bold;
+    }
+
+    input, select, textarea {
+      width: 100%;
+      padding: 10px;
+      margin-top: 5px;
+      border-radius: 4px;
+      border: none;
+      background-color: #2a2a2a;
+      color: white;
+    }
+
+    button {
+      margin-top: 20px;
+      padding: 12px;
+      width: 100%;
+      background-color: #007BFF;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background-color: #0056b3;
+    }
+
+    .message {
+      margin-top: 20px;
+      text-align: center;
+      padding: 10px;
+      border-radius: 4px;
+      display: none;
+    }
+
+    .message.success {
+      background-color: #28a745;
+    }
+
+    .message.error {
+      background-color: #dc3545;
+    }
+
+    #chartContainer {
+      margin-top: 50px;
+    }
+
+    canvas {
+      background-color: #1e1e1e;
+      border: 1px solid #333;
+      border-radius: 8px;
+    }
+
+    @media screen and (max-width: 600px) {
+      .container {
+        padding: 15px;
+      }
+    }
+  </style>
 </head>
 <body>
-    <div class="container">
-        <h1>Submit an IT Ticket</h1>
-        <form id="ticket-form">
-            <label for="reporter">Your Name:</label>
-            <input type="text" id="reporter" required />
 
-            <label for="category">Category:</label>
-            <select id="category" required>
-                <option value="">-- Select Category --</option>
-                <option value="Network">Network</option>
-                <option value="Hardware">Hardware</option>
-                <option value="Software">Software</option>
-                <option value="Access">Access</option>
-            </select>
+  <div class="container">
+    <h1>Submit IT Ticket</h1>
 
-            <label for="description">Issue Description:</label>
-            <textarea id="description" required></textarea>
+    <form id="ticketForm">
+      <label for="reporter">Your Name:</label>
+      <input type="text" id="reporter" name="reporter" required>
 
-            <button type="submit">Report Issue</button>
-        </form>
+      <label for="category">Issue Category:</label>
+      <select id="category" name="category" required>
+        <option value="" disabled selected>Select a category</option>
+        <option value="Hardware">Hardware</option>
+        <option value="Software">Software</option>
+        <option value="Network">Network</option>
+        <option value="Access">Access</option>
+      </select>
 
-        <div id="error"></div>
-        <div id="success"></div>
+      <label for="description">Describe the issue:</label>
+      <textarea id="description" name="description" rows="5" required></textarea>
 
-        <div class="chart-container">
-            <h2>Tickets Reported</h2>
-            <canvas id="ticketChart"></canvas>
-        </div>
-    </div>
+      <button type="submit">Submit Ticket</button>
+    </form>
 
-    <script src="script.js"></script>
+    <div id="message" class="message"></div>
+  </div>
+
+  <div id="chartContainer" class="container">
+    <h2>Tickets Reported by User</h2>
+    <canvas id="ticketChart" width="400" height="200"></canvas>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script>
+    // Example data
+    const ticketCounts = {
+      Alice: 4,
+      Bob: 7,
+      Charlie: 2,
+      Diana: 5,
+      Eric: 3
+    };
+
+    const form = document.getElementById('ticketForm');
+    const messageDiv = document.getElementById('message');
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      const reporter = document.getElementById('reporter').value.trim();
+      const category = document.getElementById('category').value;
+      const description = document.getElementById('description').value.trim();
+
+      try {
+        const response = await fetch('/submit-ticket', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ reporter, category, description })
+        });
+
+        const result = await response.json();
+
+        if (response.ok) {
+          messageDiv.textContent = "✅ Ticket submitted successfully!";
+          messageDiv.className = 'message success';
+          form.reset();
+        } else {
+          messageDiv.textContent = `❌ Failed to submit ticket: ${result.error}`;
+          messageDiv.className = 'message error';
+        }
+      } catch (err) {
+        messageDiv.textContent = `❌ Error submitting ticket: ${err.message}`;
+        messageDiv.className = 'message error';
+      }
+
+      messageDiv.style.display = 'block';
+    });
+
+    // Chart
+    const ctx = document.getElementById('ticketChart').getContext('2d');
+    const chart = new Chart(ctx, {
+      type: 'bar',
+      data: {
+        labels: Object.keys(ticketCounts),
+        datasets: [{
+          label: 'Tickets Reported',
+          data: Object.values(ticketCounts),
+          backgroundColor: '#007BFF',
+          borderColor: '#0056b3',
+          borderWidth: 1
+        }]
+      },
+      options: {
+        scales: {
+          y: {
+            beginAtZero: true,
+            ticks: {
+              color: '#fff'
+            },
+            grid: {
+              color: '#444'
+            }
+          },
+          x: {
+            ticks: {
+              color: '#fff'
+            },
+            grid: {
+              color: '#444'
+            }
+          }
+        },
+        plugins: {
+          legend: {
+            labels: {
+              color: '#fff'
+            }
+          }
+        }
+      }
+    });
+  </script>
+
 </body>
 </html>

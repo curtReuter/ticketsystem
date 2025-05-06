@@ -15,6 +15,7 @@ app.use(bodyParser.json());
 
 app.post('/submit-ticket', async (req, res) => {
     const { reporter, category, description } = req.body;
+    console.log('Incoming body:', req.body);
 
     try {
         const response = await fetch('https://api.notion.com/v1/pages', {

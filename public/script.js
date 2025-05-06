@@ -1,83 +1,81 @@
-const allowedReporters = ['alice', 'bob', 'charlie', 'diana']; // lowercase names
-const exampleData = {
-    'alice': 3,
-    'bob': 5,
-    'charlie': 2,
-    'diana': 4
+const allowedNames = ['curt', 'alice', 'bob', 'jane']; // lowercase
+const reporterCounts = {
+  curt: 4,
+  alice: 2,
+  bob: 3,
+  jane: 5,
 };
 
-const form = document.getElementById('ticket-form');
-const errorDiv = document.getElementById('error');
-const successDiv = document.getElementById('success');
-const ctx = document.getElementById('ticketChart').getContext('2d');
+const chartCanvas = document.getElementById('reportChart').getContext('2d');
+const responseMessage = document.getElementById('responseMessage');
 
-let chart;
-
-// Initialize bar chart with example data
-function renderChart(data) {
-    const labels = Object.keys(data);
-    const counts = Object.values(data);
-
-    if (chart) chart.destroy(); // re-render chart
-
-    chart = new Chart(ctx, {
-        type: 'bar',
-        data: {
-            labels,
-            datasets: [{
-                label: 'Tickets Reported',
-                data: counts,
-                backgroundColor: 'rgba(54, 162, 235, 0.7)',
-                borderColor: 'rgba(54, 162, 235, 1)',
-                borderWidth: 1
-            }]
-        },
-        options: {
-            scales: {
-                y: { beginAtZero: true }
-            }
+// Draw chart
+let chart = new Chart(chartCanvas, {
+  type: 'bar',
+  data: {
+    labels: Object.keys(reporterCounts),
+    datasets: [{
+      label: 'Tickets Submitted',
+      data: Object.values(reporterCounts),
+      backgroundColor: 'white',
+      borderColor: 'black',
+      borderWidth: 1
+    }]
+  },
+  options: {
+    responsive: true,
+    scales: {
+      y: {
+        beginAtZero: true
+      }
+    },
+    plugins: {
+      legend: {
+        labels: {
+          color: 'white'
         }
+      }
+    }
+  }
+});
+
+document.getElementById('ticketForm').addEventListener('submit', async function (e) {
+  e.preventDefault();
+  const nameInput = document.getElementById('name').value.trim().toLowerCase();
+  const category = document.getElementById('category').value.trim();
+  const issue = document.getElementById('issue').value.trim();
+
+  if (!allowedNames.includes(nameInput)) {
+    responseMessage.textContent = "Unauthorized reporter.";
+    responseMessage.style.color = "red";
+    return;
+  }
+
+  try {
+    const res = await fetch('/submit-ticket', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ name: nameInput, category, issue })
     });
-}
 
-renderChart(exampleData);
+    const data = await res.json();
 
-form.addEventListener('submit', async (e) => {
-    e.preventDefault();
-    errorDiv.textContent = '';
-    successDiv.textContent = '';
-
-    const reporter = document.getElementById('reporter').value.trim();
-    const category = document.getElementById('category').value;
-    const description = document.getElementById('description').value;
-
-    const reporterLower = reporter.toLowerCase();
-
-    if (!allowedReporters.includes(reporterLower)) {
-        errorDiv.textContent = 'You are not authorized to report an issue.';
-        return;
+    if (res.ok) {
+      responseMessage.textContent = "Ticket submitted successfully!";
+      responseMessage.style.color = "lime";
+      // Update chart
+      reporterCounts[nameInput] = (reporterCounts[nameInput] || 0) + 1;
+      chart.data.labels = Object.keys(reporterCounts);
+      chart.data.datasets[0].data = Object.values(reporterCounts);
+      chart.update();
+    } else {
+        responseMessage.textContent = `Failed to submit ticket: ${data.message || JSON.stringify(data)}`;
+        responseMessage.style.color = "red";
     }
-
-    try {
-        const res = await fetch('/submit-ticket', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ reporter, category, description })
-        });
-
-        const data = await res.json();
-
-        if (res.ok) {
-            successDiv.textContent = 'Ticket submitted successfully!';
-            form.reset();
-
-            // Update chart data
-            exampleData[reporterLower] = (exampleData[reporterLower] || 0) + 1;
-            renderChart(exampleData);
-        } else {
-            throw new Error(data.error || 'Submission failed.');
-        }
-    } catch (err) {
-        errorDiv.textContent = err.message;
-    }
+  } catch (err) {
+    responseMessage.textContent = "Error connecting to server.";
+    responseMessage.style.color = "red";
+  }
 });
