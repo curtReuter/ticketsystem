@@ -4,9 +4,121 @@
   <meta charset="UTF-8">
   <title>IT Ticketing System</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <link rel="stylesheet" href="styles.css">
-  <!-- Link to Font Awesome for Icons -->
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+
+  <style>
+    body {
+      background-color: #121212;
+      color: white;
+      font-family: 'Segoe UI', sans-serif;
+      margin: 0;
+      padding: 20px;
+    }
+
+    .container {
+      max-width: 600px;
+      margin: auto;
+      background: #1e1e1e;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 0 10px rgba(255, 255, 255, 0.1);
+    }
+
+    h1, h2 {
+      text-align: center;
+      color: #ffffff;
+    }
+
+    label {
+      display: block;
+      margin-top: 15px;
+      font-weight: bold;
+    }
+
+    input, select, textarea {
+      width: 100%;
+      padding: 10px;
+      margin-top: 5px;
+      border-radius: 4px;
+      border: none;
+      background-color: #2a2a2a;
+      color: white;
+    }
+
+    textarea { width: 90%; }
+    #reporter { width: 25%; }
+    #category, #description { width: 95%; }
+
+    #submit-btn {
+      margin-top: 20px;
+      padding: 12px;
+      width: 50%;
+      background-color: #007BFF;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      font-weight: bold;
+      cursor: pointer;
+      display: block;
+      margin-left: auto;
+      margin-right: auto;
+      min-width: 70px;
+    }
+
+    #submit-btn:hover {
+      background-color: #0056b3;
+    }
+
+    #messageContainer {
+      margin-top: 20px;
+      text-align: center;
+    }
+
+    .message {
+      display: inline-block;
+      padding: 10px 20px;
+      border-radius: 4px;
+      margin-top: 10px;
+      animation: fadeIn 0.3s ease-in-out;
+      font-weight: bold;
+    }
+
+    .message.success {
+      background-color: #28a745;
+      color: white;
+    }
+
+    .message.error {
+      background-color: #dc3545;
+      color: white;
+    }
+
+    .fade-out {
+      animation: fadeOut 0.5s ease-in-out forwards;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(-10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes fadeOut {
+      from { opacity: 1; transform: translateY(0); }
+      to { opacity: 0; transform: translateY(-10px); }
+    }
+
+    canvas {
+      background-color: #1e1e1e;
+      border: 1px solid #333;
+      border-radius: 8px;
+    }
+
+    @media screen and (max-width: 600px) {
+      .container {
+        padding: 15px;
+      }
+    }
+  </style>
 </head>
 <body>
 
@@ -32,7 +144,7 @@
       <button id="submit-btn" type="submit">Submit Ticket</button>
     </form>
 
-    <div id="message"></div>
+    <div id="messageContainer"></div>
   </div>
 
   <div id="chartContainer" class="container">
@@ -51,7 +163,7 @@
     };
 
     const form = document.getElementById('ticketForm');
-    const messageDiv = document.getElementById('message');
+    const messageContainer = document.getElementById('messageContainer');
 
     const ctx = document.getElementById('ticketChart').getContext('2d');
     const chart = new Chart(ctx, {
@@ -89,9 +201,12 @@
     form.addEventListener('submit', async (e) => {
       e.preventDefault();
 
-      const reporter = document.getElementById('reporter').value.trim().toLowerCase(); // Normalize to lowercase
+      const reporter = document.getElementById('reporter').value.trim().toLowerCase();
       const category = document.getElementById('category').value;
       const description = document.getElementById('description').value.trim();
+
+      // Clear previous messages
+      messageContainer.innerHTML = '';
 
       try {
         const response = await fetch('/submit-ticket', {
@@ -102,40 +217,45 @@
 
         const result = await response.json();
 
+        const messageDiv = document.createElement('div');
+        messageDiv.classList.add('message');
+
         if (response.ok) {
-          // Update ticket count for the reporter
           if (ticketCounts[reporter]) {
             ticketCounts[reporter]++;
           } else {
             ticketCounts[reporter] = 1;
           }
 
-          // Update the chart data
           chart.data.labels = Object.keys(ticketCounts);
           chart.data.datasets[0].data = Object.values(ticketCounts);
           chart.update();
 
           messageDiv.textContent = `✅ Ticket submitted successfully! Thank you, ${reporter}!`;
-          messageDiv.className = 'success show';
+          messageDiv.classList.add('success');
           form.reset();
         } else {
           messageDiv.textContent = `❌ Failed to submit ticket: ${result.error}`;
-          messageDiv.className = 'error show';
+          messageDiv.classList.add('error');
         }
+
+        messageContainer.appendChild(messageDiv);
+
+        setTimeout(() => {
+          messageDiv.classList.add('fade-out');
+          setTimeout(() => messageDiv.remove(), 500);
+        }, 10000);
       } catch (err) {
+        const messageDiv = document.createElement('div');
+        messageDiv.classList.add('message', 'error');
         messageDiv.textContent = `❌ Error submitting ticket: ${err.message}`;
-        messageDiv.className = 'error show';
+        messageContainer.appendChild(messageDiv);
+
+        setTimeout(() => {
+          messageDiv.classList.add('fade-out');
+          setTimeout(() => messageDiv.remove(), 500);
+        }, 10000);
       }
-
-      setTimeout(() => {
-        messageDiv.classList.remove('show');
-        messageDiv.classList.add('hide');
-
-        messageDiv.addEventListener('animationend', () => {
-          messageDiv.style.display = 'none';
-          messageDiv.classList.remove('hide');
-        }, { once: true });
-      }, 5000);
     });
   </script>
 
