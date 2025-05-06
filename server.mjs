@@ -13,9 +13,17 @@ app.use(cors());
 app.use(express.static('public'));
 app.use(bodyParser.json());
 
+// Get the allowed reporters from the environment variable and split it into an array
+const allowedReporters = process.env.ALLOWED_REPORTERS.split(',');
+
 app.post('/submit-ticket', async (req, res) => {
     const { reporter, category, description } = req.body;
     console.log('Incoming body:', req.body);
+
+    // Check if the reporter is in the allowed list (case-insensitive)
+    if (!allowedReporters.includes(reporter.trim().toLowerCase())) {
+        return res.status(403).json({ error: 'You are not authorized to submit a ticket.' });
+    }
 
     try {
         const response = await fetch('https://api.notion.com/v1/pages', {
@@ -56,7 +64,7 @@ app.post('/submit-ticket', async (req, res) => {
             return res.status(500).json({ error });
         }
 
-        res.status(200).json({ success: true });
+        res.status(200).json({ success: true, message: `Ticket submitted successfully, thank you ${reporter}!` });
     } catch (err) {
         res.status(500).json({ error: err.message });
     }

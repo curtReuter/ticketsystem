@@ -4,93 +4,9 @@
   <meta charset="UTF-8">
   <title>IT Ticketing System</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <style>
-    body {
-      background-color: #121212;
-      color: white;
-      font-family: 'Segoe UI', sans-serif;
-      margin: 0;
-      padding: 20px;
-    }
-
-    .container {
-      max-width: 600px;
-      margin: auto;
-      background: #1e1e1e;
-      padding: 20px;
-      border-radius: 8px;
-      box-shadow: 0 0 10px rgba(255, 255, 255, 0.1);
-    }
-
-    h1 {
-      text-align: center;
-      color: #ffffff;
-    }
-
-    label {
-      display: block;
-      margin-top: 15px;
-      font-weight: bold;
-    }
-
-    input, select, textarea {
-      width: 100%;
-      padding: 10px;
-      margin-top: 5px;
-      border-radius: 4px;
-      border: none;
-      background-color: #2a2a2a;
-      color: white;
-    }
-
-    button {
-      margin-top: 20px;
-      padding: 12px;
-      width: 100%;
-      background-color: #007BFF;
-      color: white;
-      border: none;
-      border-radius: 4px;
-      font-weight: bold;
-      cursor: pointer;
-    }
-
-    button:hover {
-      background-color: #0056b3;
-    }
-
-    .message {
-      margin-top: 20px;
-      text-align: center;
-      padding: 10px;
-      border-radius: 4px;
-      display: none;
-    }
-
-    .message.success {
-      background-color: #28a745;
-    }
-
-    .message.error {
-      background-color: #dc3545;
-    }
-
-    #chartContainer {
-      margin-top: 50px;
-    }
-
-    canvas {
-      background-color: #1e1e1e;
-      border: 1px solid #333;
-      border-radius: 8px;
-    }
-
-    @media screen and (max-width: 600px) {
-      .container {
-        padding: 15px;
-      }
-    }
-  </style>
+  <link rel="stylesheet" href="styles.css">
+  <!-- Link to Font Awesome for Icons -->
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
 </head>
 <body>
 
@@ -98,10 +14,10 @@
     <h1>Submit IT Ticket</h1>
 
     <form id="ticketForm">
-      <label for="reporter">Your Name:</label>
+      <label for="reporter"><i class="fas fa-user"></i> Your Name:</label>
       <input type="text" id="reporter" name="reporter" required>
 
-      <label for="category">Issue Category:</label>
+      <label for="category"><i class="fas fa-cogs"></i> Issue Category:</label>
       <select id="category" name="category" required>
         <option value="" disabled selected>Select a category</option>
         <option value="Hardware">Hardware</option>
@@ -110,13 +26,13 @@
         <option value="Access">Access</option>
       </select>
 
-      <label for="description">Describe the issue:</label>
+      <label for="description"><i class="fas fa-comment-dots"></i> Describe the issue:</label>
       <textarea id="description" name="description" rows="5" required></textarea>
 
-      <button type="submit">Submit Ticket</button>
+      <button id="submit-btn" type="submit">Submit Ticket</button>
     </form>
 
-    <div id="message" class="message"></div>
+    <div id="message"></div>
   </div>
 
   <div id="chartContainer" class="container">
@@ -126,53 +42,17 @@
 
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script>
-    // Example data
     const ticketCounts = {
-      Alice: 4,
-      Bob: 7,
-      Charlie: 2,
-      Diana: 5,
-      Eric: 3
+      alice: 4,
+      bob: 7,
+      charlie: 2,
+      diana: 5,
+      eric: 3
     };
 
     const form = document.getElementById('ticketForm');
     const messageDiv = document.getElementById('message');
 
-    form.addEventListener('submit', async (e) => {
-      e.preventDefault();
-
-      const reporter = document.getElementById('reporter').value.trim();
-      const category = document.getElementById('category').value;
-      const description = document.getElementById('description').value.trim();
-
-      try {
-        const response = await fetch('/submit-ticket', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify({ reporter, category, description })
-        });
-
-        const result = await response.json();
-
-        if (response.ok) {
-          messageDiv.textContent = "✅ Ticket submitted successfully!";
-          messageDiv.className = 'message success';
-          form.reset();
-        } else {
-          messageDiv.textContent = `❌ Failed to submit ticket: ${result.error}`;
-          messageDiv.className = 'message error';
-        }
-      } catch (err) {
-        messageDiv.textContent = `❌ Error submitting ticket: ${err.message}`;
-        messageDiv.className = 'message error';
-      }
-
-      messageDiv.style.display = 'block';
-    });
-
-    // Chart
     const ctx = document.getElementById('ticketChart').getContext('2d');
     const chart = new Chart(ctx, {
       type: 'bar',
@@ -190,30 +70,72 @@
         scales: {
           y: {
             beginAtZero: true,
-            ticks: {
-              color: '#fff'
-            },
-            grid: {
-              color: '#444'
-            }
+            ticks: { color: '#fff' },
+            grid: { color: '#444' }
           },
           x: {
-            ticks: {
-              color: '#fff'
-            },
-            grid: {
-              color: '#444'
-            }
+            ticks: { color: '#fff' },
+            grid: { color: '#444' }
           }
         },
         plugins: {
           legend: {
-            labels: {
-              color: '#fff'
-            }
+            labels: { color: '#fff' }
           }
         }
       }
+    });
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      const reporter = document.getElementById('reporter').value.trim().toLowerCase(); // Normalize to lowercase
+      const category = document.getElementById('category').value;
+      const description = document.getElementById('description').value.trim();
+
+      try {
+        const response = await fetch('/submit-ticket', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ reporter, category, description })
+        });
+
+        const result = await response.json();
+
+        if (response.ok) {
+          // Update ticket count for the reporter
+          if (ticketCounts[reporter]) {
+            ticketCounts[reporter]++;
+          } else {
+            ticketCounts[reporter] = 1;
+          }
+
+          // Update the chart data
+          chart.data.labels = Object.keys(ticketCounts);
+          chart.data.datasets[0].data = Object.values(ticketCounts);
+          chart.update();
+
+          messageDiv.textContent = `✅ Ticket submitted successfully! Thank you, ${reporter}!`;
+          messageDiv.className = 'success show';
+          form.reset();
+        } else {
+          messageDiv.textContent = `❌ Failed to submit ticket: ${result.error}`;
+          messageDiv.className = 'error show';
+        }
+      } catch (err) {
+        messageDiv.textContent = `❌ Error submitting ticket: ${err.message}`;
+        messageDiv.className = 'error show';
+      }
+
+      setTimeout(() => {
+        messageDiv.classList.remove('show');
+        messageDiv.classList.add('hide');
+
+        messageDiv.addEventListener('animationend', () => {
+          messageDiv.style.display = 'none';
+          messageDiv.classList.remove('hide');
+        }, { once: true });
+      }, 5000);
     });
   </script>
 
