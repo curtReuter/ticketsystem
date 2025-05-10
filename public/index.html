@@ -35,7 +35,9 @@
       font-weight: bold;
     }
 
-    input, select, textarea {
+    input[type="text"],
+    select,
+    textarea {
       width: 100%;
       padding: 10px;
       margin-top: 5px;
@@ -46,8 +48,19 @@
     }
 
     textarea { width: 90%; }
-    #reporter { width: 25%; }
-    #category, #description { width: 95%; }
+    #reporter, #priority, .category-group { width: 25%; display: inline-block; vertical-align: top; }
+
+    .category-group {
+      margin-top: 10px;
+    }
+
+    .category-group label {
+      font-weight: normal;
+      display: block;
+      margin: 3px 0;
+    }
+
+    #description { width: 95%; }
 
     #submit-btn {
       margin-top: 20px;
@@ -117,6 +130,10 @@
       .container {
         padding: 15px;
       }
+
+      #reporter, #priority, .category-group {
+        width: 25%;
+      }
     }
   </style>
 </head>
@@ -129,14 +146,21 @@
       <label for="reporter"><i class="fas fa-user"></i> First Name:</label>
       <input type="text" id="reporter" name="reporter" required>
 
-      <label for="category"><i class="fas fa-cogs"></i> Category:</label>
-      <select id="category" name="category" required>
-        <option value="" disabled selected>Select a category</option>
-        <option value="Hardware">Hardware</option>
-        <option value="Software">Software</option>
-        <option value="Network">Network</option>
-        <option value="Access">Access</option>
+      <label for="priority"><i class="fas fa-exclamation-triangle"></i> Priority:</label>
+      <select id="priority" name="priority" required>
+        <option value="" disabled selected>Select priority</option>
+        <option value="Low">Low</option>
+        <option value="Medium">Medium</option>
+        <option value="High">High</option>
       </select>
+
+      <!-- <label><i class="fas fa-cogs"></i> Category:</label> -->
+      <!-- <div class="category-group">
+        <label><input type="checkbox" name="category" value="Hardware"> Hardware</label>
+        <label><input type="checkbox" name="category" value="Software"> Software</label>
+        <label><input type="checkbox" name="category" value="Network"> Network</label>
+        <label><input type="checkbox" name="category" value="Access"> Access</label>
+      </div> -->
 
       <label for="description"><i class="fas fa-comment-dots"></i> Description:</label>
       <textarea id="description" name="description" rows="5" required></textarea>
@@ -202,17 +226,19 @@
       e.preventDefault();
 
       const reporter = document.getElementById('reporter').value.trim().toLowerCase();
-      const category = document.getElementById('category').value;
+      const priority = document.getElementById('priority').value;
       const description = document.getElementById('description').value.trim();
 
-      // Clear previous messages
+      const checkedBoxes = document.querySelectorAll('input[name="category"]:checked');
+      const category = Array.from(checkedBoxes).map(cb => cb.value);
+
       messageContainer.innerHTML = '';
 
       try {
         const response = await fetch('/submit-ticket', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ reporter, category, description })
+          body: JSON.stringify({ reporter, category, description, priority })
         });
 
         const result = await response.json();
@@ -231,8 +257,7 @@
           chart.data.datasets[0].data = Object.values(ticketCounts);
           chart.update();
 
-          messageDiv.textContent = `✅ Ticket submitted successfully! 
-          Thank you, ${reporter}!`;
+          messageDiv.textContent = `✅ Ticket submitted successfully! Thank you, ${reporter}!`;
           messageDiv.classList.add('success');
           form.reset();
         } else {
@@ -259,6 +284,5 @@
       }
     });
   </script>
-
 </body>
 </html>

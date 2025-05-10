@@ -13,19 +13,19 @@ app.use(cors());
 app.use(express.static('public'));
 app.use(bodyParser.json());
 
-// Get the allowed reporters from the environment variable and split it into an array
 const allowedReporters = process.env.ALLOWED_REPORTERS.split(',');
 
 app.post('/submit-ticket', async (req, res) => {
-    const { reporter, category, description } = req.body;
+    const { reporter, category, description, priority } = req.body;
     console.log('Incoming body:', req.body);
 
-    // Check if the reporter is in the allowed list (case-insensitive)
     if (!allowedReporters.includes(reporter.trim().toLowerCase())) {
         return res.status(403).json({ error: 'You are not authorized to submit a ticket.' });
     }
 
     try {
+        const createdDate = new Date().toISOString(); // ISO format for Notion
+
         const response = await fetch('https://api.notion.com/v1/pages', {
             method: 'POST',
             headers: {
@@ -43,17 +43,27 @@ app.post('/submit-ticket', async (req, res) => {
                             }
                         ]
                     },
-                    'Category': {
-                        select: {
-                            name: category
-                        }
-                    },
+                    // Uncomment if using multi-select in Notion for Category:
+                    // 'Category': {
+                    //     multi_select: category.map(cat => ({ name: cat }))
+                    // },
                     'Description': {
                         rich_text: [
                             {
                                 text: { content: description }
                             }
                         ]
+                    },
+                    'Priority': {
+                        select: {
+                            name: priority
+                        }
+                    },
+                    'Created': {
+                        date: {
+                            start: createdDate,
+                            time_zone: 'America/New_York' // Display in EDT
+                        }
                     }
                 }
             })
@@ -70,6 +80,6 @@ app.post('/submit-ticket', async (req, res) => {
     }
 });
 
-app.listen(PORT, () => {
-    console.log(`Server running on http://localhost:${PORT}`);
+app.listen(PORT, '0.0.0.0', () => {
+    console.log(`Server running on http://0.0.0.0:${PORT}`);
 });
