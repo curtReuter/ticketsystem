@@ -48,7 +48,7 @@
     }
 
     textarea { width: 90%; }
-    #reporter, #priority, .category-group { width: 25%; display: inline-block; vertical-align: top; }
+    #reporter, #priority, #title, .category-group { width: 25%; display: inline-block; vertical-align: top; }
 
     .category-group {
       margin-top: 10px;
@@ -153,6 +153,10 @@
         <option value="Medium">Medium</option>
         <option value="High">High</option>
       </select>
+      
+      <label for="title"><i class="fas fa-text-width"></i> Title:</label>
+      <input type="text" id="title" name="title" required>
+      
 
       <!-- <label><i class="fas fa-cogs"></i> Category:</label> -->
       <!-- <div class="category-group">
@@ -223,23 +227,24 @@
     });
 
     form.addEventListener('submit', async (e) => {
-      e.preventDefault();
+  e.preventDefault();
 
-      const reporter = document.getElementById('reporter').value.trim().toLowerCase();
-      const priority = document.getElementById('priority').value;
-      const description = document.getElementById('description').value.trim();
+  const reporter = document.getElementById('reporter').value.trim().toLowerCase();
+  const priority = document.getElementById('priority').value;
+  const title = document.getElementById('title').value.trim(); // ✅ get title
+  const description = document.getElementById('description').value.trim();
 
-      const checkedBoxes = document.querySelectorAll('input[name="category"]:checked');
-      const category = Array.from(checkedBoxes).map(cb => cb.value);
+  const checkedBoxes = document.querySelectorAll('input[name="category"]:checked');
+  const category = Array.from(checkedBoxes).map(cb => cb.value);
 
-      messageContainer.innerHTML = '';
+  messageContainer.innerHTML = '';
 
-      try {
-        const response = await fetch('/submit-ticket', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ reporter, category, description, priority })
-        });
+  try {
+    const response = await fetch('/submit-ticket', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ reporter, category, description, priority, title }) // ✅ include title
+    });
 
         const result = await response.json();
 

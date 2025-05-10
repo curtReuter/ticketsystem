@@ -16,7 +16,7 @@ app.use(bodyParser.json());
 const allowedReporters = process.env.ALLOWED_REPORTERS.split(',');
 
 app.post('/submit-ticket', async (req, res) => {
-    const { reporter, category, description, priority } = req.body;
+    const { reporter, category, description, priority, title } = req.body;
     console.log('Incoming body:', req.body);
 
     if (!allowedReporters.includes(reporter.trim().toLowerCase())) {
@@ -24,7 +24,9 @@ app.post('/submit-ticket', async (req, res) => {
     }
 
     try {
-        const createdDate = new Date().toISOString(); // ISO format for Notion
+        const createdDate = new Date().toISOString();
+
+        console.log('Title being sent to Notion:', title);
 
         const response = await fetch('https://api.notion.com/v1/pages', {
             method: 'POST',
@@ -34,36 +36,44 @@ app.post('/submit-ticket', async (req, res) => {
                 'Content-Type': 'application/json'
             },
             body: JSON.stringify({
-                parent: { database_id: process.env.NOTION_DATABASE_ID },
+                parent: { database_id: process.env.TICKETS_DATABASE_ID },
                 properties: {
-                    'Reporter': {
-                        title: [
+                    Reporter: {
+                        rich_text: [
                             {
                                 text: { content: reporter }
                             }
                         ]
                     },
-                    // Uncomment if using multi-select in Notion for Category:
-                    // 'Category': {
-                    //     multi_select: category.map(cat => ({ name: cat }))
-                    // },
-                    'Description': {
+                    Title: {
+                        title: [
+                            {
+                                text: { content: title }
+                            }
+                        ]
+                    },
+                    Description: {
                         rich_text: [
                             {
                                 text: { content: description }
                             }
                         ]
                     },
-                    'Priority': {
+                    Priority: {
                         select: {
                             name: priority
                         }
                     },
-                    'Created': {
+                    Created: {
                         date: {
                             start: createdDate,
-                            time_zone: 'America/New_York' // Display in EDT
+                            time_zone: 'America/New_York'
                         }
+                    },
+                    Category: {
+                        multi_select: Array.isArray(category)
+                            ? category.map(cat => ({ name: cat }))
+                            : []
                     }
                 }
             })
