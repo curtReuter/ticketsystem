@@ -26,7 +26,7 @@ app.post('/submit-ticket', async (req, res) => {
     try {
         const createdDate = new Date().toISOString();
 
-        console.log('Title being sent to Notion:', title);
+        // console.log('Title being sent to Notion:', title);
 
         const response = await fetch('https://api.notion.com/v1/pages', {
             method: 'POST',
