@@ -1,208 +1,194 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>Report Issue</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
-
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Report an issue</title>
   <style>
     body {
-      background-color: #121212;
-      color: white;
-      font-family: 'Segoe UI', sans-serif;
-      margin: 0;
-      padding: 20px;
+      background-color: #181818;
+      color: #eaeaea;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      margin: 40px;
     }
 
-    .container {
-      max-width: 600px;
-      margin: auto;
-      background: #1e1e1e;
-      padding: 20px;
-      border-radius: 8px;
-      box-shadow: 0 0 10px rgba(255, 255, 255, 0.1);
-    }
-
-    h1, h2 {
+    h1 {
       text-align: center;
-      color: #ffffff;
+      color: #e0e8ff;
+      margin-bottom: 40px;
+    }
+
+    form {
+      background-color: #1f1f2e;
+      border-radius: 10px;
+      padding: 30px;
+      max-width: 600px;
+      margin: 0 auto 1px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.4);
     }
 
     label {
       display: block;
-      margin-top: 15px;
+      margin-top: 20px;
       font-weight: bold;
+      color: #d0d8ff;
     }
 
     input[type="text"],
-    select,
-    textarea {
+    textarea,
+    select {
       width: 100%;
-      padding: 10px;
-      margin-top: 5px;
-      border-radius: 4px;
-      border: none;
-      background-color: #2a2a2a;
-      color: white;
-    }
-
-    textarea { width: 90%; }
-    #reporter, #priority, #title, .category-group { width: 25%; display: inline-block; vertical-align: top; }
-
-    .category-group {
-      margin-top: 10px;
-    }
-
-    .category-group label {
-      font-weight: normal;
-      display: block;
-      margin: 3px 0;
-    }
-
-    #description { width: 95%; }
-
-    #submit-btn {
-      margin-top: 20px;
       padding: 12px;
-      width: 50%;
-      background-color: #007BFF;
-      color: white;
+      margin-top: 8px;
+      border-radius: 5px;
       border: none;
-      border-radius: 4px;
-      font-weight: bold;
-      cursor: pointer;
-      display: block;
-      margin-left: auto;
-      margin-right: auto;
-      min-width: 70px;
+      background-color: #2a2a3b;
+      color: #fff;
+      font-size: 14px;
     }
 
-    #submit-btn:hover {
-      background-color: #0056b3;
+    input {
+
+    }
+
+    button {
+      display: block;
+      min-width: 76px;
+      width: 25%;
+      padding: 12px;
+      margin-top: 30px;
+      background-color: #4a90e2;
+      color: white;
+      font-weight: bold;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      font-size: 16px;
+      display: block;
+      margin: 0 auto;
+    }
+
+    button:hover {
+      background-color: #357abd;
     }
 
     #messageContainer {
-      margin-top: 20px;
-      text-align: center;
+  text-align: center;
+  margin-top: 20px;
+  margin-bottom: 20px;
     }
 
     .message {
-      display: inline-block;
-      padding: 10px 20px;
-      border-radius: 4px;
-      margin-top: 10px;
-      animation: fadeIn 0.3s ease-in-out;
-      font-weight: bold;
+      padding: 15px; 
+      margin: 20px auto 0 auto; /* this centers it horizontally */
+      border-radius: 5px;
+      width: 400px;
+      text-align: center;
     }
-
-    .message.success {
-      background-color: #28a745;
+    .success {
+      background-color: rgb(88, 219, 88);
       color: white;
     }
 
-    .message.error {
+    .error {
       background-color: #dc3545;
       color: white;
     }
 
     .fade-out {
-      animation: fadeOut 0.5s ease-in-out forwards;
-    }
-
-    @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(-10px); }
-      to { opacity: 1; transform: translateY(0); }
+      animation: fadeOut 0.5s ease forwards;
     }
 
     @keyframes fadeOut {
-      from { opacity: 1; transform: translateY(0); }
-      to { opacity: 0; transform: translateY(-10px); }
+      to {
+        opacity: 0;
+        transform: translateY(-10px);
+      }
     }
 
     canvas {
-      background-color: #1e1e1e;
-      border: 1px solid #333;
+      display: block;
+      margin: 0 auto;
+      max-width: 720px;
+      background-color: #1f1f2e;
+      padding: 20px;
       border-radius: 8px;
     }
 
-    @media screen and (max-width: 1000px) {
-      .container {
-        padding: 15px;
-      }
+    #ticketForm {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 15px; /* ensures spacing between items */
+}
 
-      #reporter, #priority, .category-group {
-        width: 25%;
-      }
-    }
+#ticketForm label {
+  width: 100%;
+  margin-top: 10px;
+}
+
+#ticketForm input[type="text"],
+#ticketForm select,
+#ticketForm textarea {
+  width: 25%;
+  min-width: 200px; /* optional: prevents inputs from getting too narrow */
+  background-color: #2a2a2a;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  padding: 10px;
+  box-sizing: border-box;
+}
+
+#ticketForm textarea {
+  width: 95%; /* wider for description area */
+}
+
   </style>
 </head>
 <body>
+  <h1>Report an issue</h1>
 
-  <div class="container">
-    <h1>DTAC Issue Reporter</h1>
+  <form id="ticketForm">
+    <label for="reporter">First Name</label>
+    <input type="text" id="reporter" required />
 
-    <form id="ticketForm">
-      <label for="reporter"><i class="fas fa-user"></i> First Name:</label>
-      <input type="text" id="reporter" name="reporter" required>
+    <label for="title">Title</label>
+    <input type="text" id="title" required />
 
-      <label for="priority"><i class="fas fa-exclamation-triangle"></i> Priority:</label>
-      <select id="priority" name="priority" required>
-        <option value="" disabled selected>Select priority</option>
-        <option value="Low">Low</option>
-        <option value="Medium">Medium</option>
-        <option value="High">High</option>
-      </select>
-      
-      <label for="title"><i class="fas fa-text-width"></i> Title:</label>
-      <input type="text" id="title" name="title" required>
-      
+    <label for="description">Description</label>
+    <textarea id="description" rows="4" required></textarea>
 
-      <!-- <label><i class="fas fa-cogs"></i> Category:</label> -->
-      <!-- <div class="category-group">
-        <label><input type="checkbox" name="category" value="Hardware"> Hardware</label>
-        <label><input type="checkbox" name="category" value="Software"> Software</label>
-        <label><input type="checkbox" name="category" value="Network"> Network</label>
-        <label><input type="checkbox" name="category" value="Access"> Access</label>
-      </div> -->
+    <label for="priority">Priority</label>
+    <select id="priority" required>
+      <option value="Low">Low</option>
+      <option value="Medium" selected>Medium</option>
+      <option value="High">High</option>
+    </select>
 
-      <label for="description"><i class="fas fa-comment-dots"></i> Description:</label>
-      <textarea id="description" name="description" rows="5" required></textarea>
+    <button type="submit">Submit Ticket</button>
+  </form>
 
-      <button id="submit-btn" type="submit">Submit Ticket</button>
-    </form>
+  <div id="messageContainer"></div>
 
-    <div id="messageContainer"></div>
-  </div>
-
-  <div id="chartContainer" class="container">
-    <h2>Tickets Reported by User</h2>
-    <canvas id="ticketChart" width="400" height="200"></canvas>
-  </div>
+  <canvas id="ticketChart" width="600" height="300"></canvas>
 
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script>
-    const ticketCounts = {
-      alice: 4,
-      bob: 7,
-      charlie: 2,
-      diana: 5,
-      eric: 3
-    };
-
     const form = document.getElementById('ticketForm');
     const messageContainer = document.getElementById('messageContainer');
-
     const ctx = document.getElementById('ticketChart').getContext('2d');
+
+    let ticketCounts = {};
+
     const chart = new Chart(ctx, {
       type: 'bar',
       data: {
-        labels: Object.keys(ticketCounts),
+        labels: [],
         datasets: [{
           label: 'Tickets Reported',
-          data: Object.values(ticketCounts),
-          backgroundColor: '#007BFF',
-          borderColor: '#0056b3',
+          data: [],
+          backgroundColor: '#4a90e2',
+          borderColor: '#357abd',
           borderWidth: 1
         }]
       },
@@ -210,41 +196,67 @@
         scales: {
           y: {
             beginAtZero: true,
-            ticks: { color: '#fff' },
-            grid: { color: '#444' }
+            ticks: {
+              color: '#eaeaea',
+              stepSize: 1,
+              precision: 0
+            },
+            grid: {
+              color: '#333'
+            }
           },
           x: {
-            ticks: { color: '#fff' },
-            grid: { color: '#444' }
+            ticks: {
+              color: '#eaeaea'
+            },
+            grid: {
+              color: '#333'
+            }
           }
         },
         plugins: {
           legend: {
-            labels: { color: '#fff' }
+            labels: {
+              color: '#eaeaea'
+            }
           }
         }
       }
     });
 
+    async function fetchTicketCounts() {
+      try {
+        const response = await fetch('/ticket-counts');
+        if (!response.ok) throw new Error('Failed to fetch ticket counts');
+        ticketCounts = await response.json();
+        updateChart();
+      } catch (error) {
+        console.error('Error fetching ticket counts:', error);
+      }
+    }
+
+    function updateChart() {
+      chart.data.labels = Object.keys(ticketCounts);
+      chart.data.datasets[0].data = Object.values(ticketCounts);
+      chart.update();
+    }
+
     form.addEventListener('submit', async (e) => {
-  e.preventDefault();
+      e.preventDefault();
 
-  const reporter = document.getElementById('reporter').value.trim().toLowerCase();
-  const priority = document.getElementById('priority').value;
-  const title = document.getElementById('title').value.trim(); // ✅ get title
-  const description = document.getElementById('description').value.trim();
+      const reporter = document.getElementById('reporter').value.trim().toLowerCase();
+      const title = document.getElementById('title').value.trim();
+      const description = document.getElementById('description').value.trim();
+      const priority = document.getElementById('priority').value;
 
-  const checkedBoxes = document.querySelectorAll('input[name="category"]:checked');
-  const category = Array.from(checkedBoxes).map(cb => cb.value);
+      messageContainer.innerHTML = '';
 
-  messageContainer.innerHTML = '';
-
-  try {
-    const response = await fetch('/submit-ticket', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ reporter, category, description, priority, title }) // ✅ include title
-    });
+      try {
+        const response = await fetch('/submit-ticket', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ reporter, priority, description, title })
+        });
 
         const result = await response.json();
 
@@ -252,19 +264,10 @@
         messageDiv.classList.add('message');
 
         if (response.ok) {
-          if (ticketCounts[reporter]) {
-            ticketCounts[reporter]++;
-          } else {
-            ticketCounts[reporter] = 1;
-          }
-
-          chart.data.labels = Object.keys(ticketCounts);
-          chart.data.datasets[0].data = Object.values(ticketCounts);
-          chart.update();
-
           messageDiv.textContent = `✅ Ticket submitted successfully! Thank you, ${reporter}!`;
           messageDiv.classList.add('success');
           form.reset();
+          await fetchTicketCounts();
         } else {
           messageDiv.textContent = `❌ Failed to submit ticket: ${result.error}`;
           messageDiv.classList.add('error');
@@ -288,6 +291,8 @@
         }, 10000);
       }
     });
+
+    fetchTicketCounts();
   </script>
 </body>
 </html>
