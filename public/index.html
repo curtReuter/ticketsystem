@@ -47,10 +47,6 @@
       font-size: 14px;
     }
 
-    input {
-
-    }
-
     button {
       display: block;
       min-width: 76px;
@@ -64,27 +60,28 @@
       border-radius: 5px;
       cursor: pointer;
       font-size: 16px;
-      display: block;
       margin: 0 auto;
+      transition: opacity 0.3s;
     }
 
-    button:hover {
+    button:hover:enabled {
       background-color: #357abd;
     }
 
     #messageContainer {
-  text-align: center;
-  margin-top: 20px;
-  margin-bottom: 20px;
+      text-align: center;
+      margin-top: 20px;
+      margin-bottom: 40px; /* Added bottom padding */
     }
 
     .message {
       padding: 15px; 
-      margin: 20px auto 0 auto; /* this centers it horizontally */
+      margin: 20px auto 0 auto;
       border-radius: 5px;
       width: 400px;
       text-align: center;
     }
+
     .success {
       background-color: rgb(88, 219, 88);
       color: white;
@@ -117,32 +114,32 @@
     }
 
     #ticketForm {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 15px; /* ensures spacing between items */
-}
+      display: flex;
+      flex-wrap: wrap;
+      gap: 15px;
+    }
 
-#ticketForm label {
-  width: 100%;
-  margin-top: 10px;
-}
+    #ticketForm label {
+      width: 100%;
+      margin-top: 10px;
+    }
 
-#ticketForm input[type="text"],
-#ticketForm select,
-#ticketForm textarea {
-  width: 25%;
-  min-width: 200px; /* optional: prevents inputs from getting too narrow */
-  background-color: #2a2a2a;
-  color: white;
-  border: none;
-  border-radius: 4px;
-  padding: 10px;
-  box-sizing: border-box;
-}
+    #ticketForm input[type="text"],
+    #ticketForm select,
+    #ticketForm textarea {
+      width: 25%;
+      min-width: 200px;
+      background-color: #2a2a2a;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      padding: 10px;
+      box-sizing: border-box;
+    }
 
-#ticketForm textarea {
-  width: 95%; /* wider for description area */
-}
+    #ticketForm textarea {
+      width: 95%;
+    }
 
   </style>
 </head>
@@ -178,6 +175,7 @@
     const form = document.getElementById('ticketForm');
     const messageContainer = document.getElementById('messageContainer');
     const ctx = document.getElementById('ticketChart').getContext('2d');
+    const submitButton = form.querySelector('button[type="submit"]');
 
     let ticketCounts = {};
 
@@ -245,6 +243,10 @@
     form.addEventListener('submit', async (e) => {
       e.preventDefault();
 
+      submitButton.disabled = true;
+      submitButton.style.opacity = 0.6;
+      submitButton.textContent = 'Submitting...';
+
       const reporter = document.getElementById('reporter').value.trim().toLowerCase();
       const title = document.getElementById('title').value.trim();
       const description = document.getElementById('description').value.trim();
@@ -291,6 +293,12 @@
           setTimeout(() => messageDiv.remove(), 500);
         }, 10000);
       }
+
+      setTimeout(() => {
+        submitButton.disabled = false;
+        submitButton.style.opacity = 1;
+        submitButton.textContent = 'Submit Ticket';
+      }, 10000);
     });
 
     fetchTicketCounts();
