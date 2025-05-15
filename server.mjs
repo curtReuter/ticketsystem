@@ -105,7 +105,7 @@ async function createCountPage(reporter) {
 }
 
 app.post('/submit-ticket', async (req, res) => {
-  const { reporter, category, description, priority, title } = req.body;
+  const { reporter, description, priority, title } = req.body;
   const normalizedReporter = reporter.trim().toLowerCase();
 
   if (!allowedReporters.includes(normalizedReporter)) {
@@ -114,6 +114,49 @@ app.post('/submit-ticket', async (req, res) => {
 
   try {
     const createdDate = new Date().toISOString();
+
+    // Build the properties object
+    const properties = {
+      Reporter: {
+        rich_text: [
+          {
+            text: { content: reporter }
+          }
+        ]
+      },
+      Title: {
+        title: [
+          {
+            text: { content: title }
+          }
+        ]
+      },
+      Description: {
+        rich_text: [
+          {
+            text: { content: description }
+          }
+        ]
+      },
+      Priority: {
+        select: {
+          name: priority
+        }
+      },
+      Created: {
+        date: {
+          start: createdDate,
+          time_zone: 'America/New_York'
+        }
+      }
+    };
+
+    // If title is numeric, assign "gun" category
+    if (/^\d+$/.test(title)) {
+      properties.Category = {
+        multi_select: [{ name: "gun" }]
+      };
+    }
 
     // Create ticket in the tickets database
     const ticketResponse = await fetch(`${NOTION_API_URL}/pages`, {
@@ -125,45 +168,7 @@ app.post('/submit-ticket', async (req, res) => {
       },
       body: JSON.stringify({
         parent: { database_id: TICKETS_DATABASE_ID },
-        properties: {
-          Reporter: {
-            rich_text: [
-              {
-                text: { content: reporter }
-              }
-            ]
-          },
-          Title: {
-            title: [
-              {
-                text: { content: title }
-              }
-            ]
-          },
-          Description: {
-            rich_text: [
-              {
-                text: { content: description }
-              }
-            ]
-          },
-          Priority: {
-            select: {
-              name: priority
-            }
-          },
-          Created: {
-            date: {
-              start: createdDate,
-              time_zone: 'America/New_York'
-            }
-          },
-          Category: {
-            multi_select: Array.isArray(category)
-              ? category.map(cat => ({ name: cat }))
-              : []
-          }
-        }
+        properties
       })
     });
 
